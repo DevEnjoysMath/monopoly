@@ -1,15 +1,43 @@
 # Freeboard City
 
-Live: https://freeboard-city.blithecivet128.chatgpt.site
+Free property trading for 2–8 friends, including an 80-space map with cities in India, Pakistan, Albania, and Greece. Includes private rooms, bots, auctions, trades, houses, hotels, mortgages, prison pardon cards, and configurable rules.
 
-Create a room, choose a map, and copy its invite link. Friends enter their names and join before the host starts. Supports 2–8 human players. Keep the same browser to resume a seat; the player credential stays in local storage. Room state is held in D1, with revision checks preventing concurrent actions from overwriting one another. Clients poll every 1.5 seconds.
+## Play locally
 
-Maps: World Tour (40), Grand Europe (48), Global Empire (64). Rules include buying, rent, color sets, houses/hotels, even construction, trades, mortgages, jail, doubles, bankruptcy, and optional round limits and park jackpots.
+Requires Node.js 22 or newer. No npm dependencies, account, subscription, or hosting credits are needed.
 
-Run `npm test` for game rules; `npm run build` emits the deployable Worker. `node smoke.mjs` checks two independent players against the live API and creates a test room.
+On macOS, double-click **Start Freeboard.command**, or run this from the project folder:
+
+```sh
+npm start
+```
+
+Open **http://localhost:4173**. Keep the terminal open while playing. Press Control+C to stop. Restart with the same command to resume saved rooms. Use the same browser and hostname to retain your player seat.
+
+The server saves rooms in `.local/rooms.json`. Keep this file private because it contains player credentials. The downloadable source ZIP excludes saved rooms. One server process should own each data file.
+
+## Friends on the same Wi-Fi
+
+```sh
+npm run start:lan
+```
+
+Open the Wi-Fi address printed in the terminal on each device. Create a room through that Wi-Fi address so the copied invitation works for friends. Allow the local server through the macOS firewall if prompted. This serves your game on your local network and works while your computer is awake. Friends elsewhere need an internet deployment or a tunnel; a localhost link is only usable on your own computer.
+
+## Board controls
+
+Readable mode gives every city its own upright label and flag. Scroll inside the board to explore large maps. Use **Fit board** for an overview, **+ / −** for zoom, and **Find my pawn** to return to your position. Turn actions stay above the board while you scroll. **Browse cities** searches cities, countries, districts, and ownership.
+
+## Development and hosting
+
+```sh
+npm test
+npm run build
+node smoke.mjs http://localhost:4173
+```
+
+`npm run build` generates `dist/server/index.js`, a Cloudflare Worker with an embedded UI. Internet hosting requires a compatible Worker host and a D1 `DB` binding with the schema in `drizzle/`. The former Sites URL was https://freeboard-city.blithecivet128.chatgpt.site. The local version runs independently of that account. The `.openai/hosting.json` preserves the original project identity for later reconnection.
 
 ## REA investigation
 
-The official morluto/rea repository was cloned beside this project at `../rea-tools`. The official `rea-agents@6.8.0` CLI ran its Playwright browser scenario against https://richup.io/. Successful home-page observation: `ev_5b885606afd6b70491f72e5ea8feae3a3a0fc1e2f9751131d7b118cf014ea3b3`. It observed the nickname, Play / All rooms / Create a private game controls and the public rules. The attempt to inspect private-room setup timed out at the cookie-consent action and did not establish the room's behavior. No reference server source or internal protocol was recovered.
-
-This is an independent implementation of the property trading loop. It does not reproduce Richup's full UI, animations, auctions, public matchmaking, accounts, or cosmetic store. City events are a small original deck; maps and assets are original. REA is an investigation tool, not the game's runtime.
+The official `morluto/rea` repository is cloned beside this checkout at `../rea-tools`. REA CLI 6.8.0 is installed locally and has been used to inspect Richup's public pages and JavaScript, including its room module and pardon-card controls. REA is a research tool; it is not required to run this game. `PARITY.md` records the findings and remaining gaps. This is an independent implementation; complete one-to-one Richup parity has not been established.

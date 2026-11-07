@@ -1,1 +1,1 @@
-{"name":"freeboard-city","private":true,"type":"module","scripts":{"build":"node build.mjs","test":"node --test test.mjs"}}
+{"name":"freeboard-city","private":true,"type":"module","engines":{"node":">=22"},"scripts":{"start":"node build.mjs && node local.mjs","start:lan":"node build.mjs && HOST=0.0.0.0 node local.mjs","build":"node build.mjs","test":"node --test test.mjs"}}

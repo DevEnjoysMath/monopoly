@@ -39,6 +39,35 @@ create.onclick = async () => {
   await action('bots',{enabled:true});
   if (data.game.players.length>1) await action('start');
 };
+
+const showPropertyWithActions = showProperty;
+showProperty = function showPropertyWithPurchaseFlow() {
+  showPropertyWithActions();
+  const card=document.querySelector('.property-card');
+  const tile=data?.board?.[selected];
+  if(!card || !tile) return;
+  card.classList.add('rich-property-card');
+  const game=data.game, me=data.me, player=game.players.find(p=>p.id===me);
+  const owner=game.properties[tile.id]?.owner;
+  const isMyTurn=game.status==='playing' && game.players[game.turn]?.id===me;
+  const canBuy=isMyTurn && game.phase==='buy' && player.pos===tile.id && !owner && tile.price!=null;
+  const oldTitle=card.querySelector('h2');
+  if(oldTitle) oldTitle.innerHTML='<span class="deed-country">'+esc(tile.country||tile.type)+'</span><span>'+esc((tile.flag||'')+' '+tile.name)+'</span>';
+  const details=card.querySelector('#rent-details');
+  if(details && tile.type==='property' && tile.rents && !details.querySelector('.rent-heading')){
+    const heading=document.createElement('div');heading.className='rent-heading';heading.innerHTML='<span>Rent schedule</span><small>Current level highlighted</small>';details.prepend(heading);
+    details.querySelectorAll('.rent-row').forEach((row,index)=>{if(index===game.properties[tile.id]?.level)row.classList.add('current-rent');});
+  }
+  const actions=card.querySelector('#asset-actions');
+  if(canBuy){
+    const buy=btn('Buy for '+money(tile.price),'buy',player.cash<tile.price);buy.className='primary-purchase';
+    const pass=btn(game.rules.auction?'Pass · auction':'Pass','skip');pass.className='secondary-purchase';
+    actions.prepend(buy,pass);
+    const note=document.createElement('p');note.className='purchase-note';note.textContent='You are standing here. Buy it for your empire or pass on the deal.';actions.before(note);
+  } else if(owner && owner!==me && game.status==='playing'){
+    const note=document.createElement('p');note.className='purchase-note';note.textContent='Owned by '+(game.players.find(p=>p.id===owner)?.name||'another player')+'. Land here to pay rent.';actions.before(note);
+  }
+};
 all.textContent = 'Join with code';
 
 const atlasDialog = document.createElement('dialog');

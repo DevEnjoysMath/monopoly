@@ -1,0 +1,72 @@
+/* The board owns the available width. Side panels have a bounded width. */
+body.in-room main{max-width:1920px;padding:18px 24px}
+body.in-room #error:empty{display:none}
+.game{grid-template-columns:minmax(0,1fr) 310px;gap:24px}
+.board-wrap{min-width:0;max-width:none;width:100%;position:static}
+.sidebar{min-width:0}
+.board-viewport{width:100%;max-height:calc(100dvh - 195px);min-height:260px;overflow:auto;overscroll-behavior:contain;border:1px solid #40354e;border-radius:10px;background:#171120;padding:8px;scrollbar-color:#79618e #21192d;scrollbar-width:auto}
+.board{min-width:0;max-width:none;flex-shrink:0;gap:3px;margin:0 auto;background:transparent;padding:0}
+.board-tools{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.zoom-controls{display:flex;align-items:center;gap:5px}
+.board-tools button{padding:8px 11px;font-size:12px;background:#392b4c}
+.board-tools button[aria-pressed=true]{background:#7950c5}
+.board-tools output{min-width:40px;text-align:center;font-size:12px;color:#d4c6e4}
+.board-hint{font-size:12px;color:#a99ab9;margin:8px 0}
+.turn-dock{display:flex;gap:12px;align-items:center;justify-content:space-between;min-height:48px;margin:0 0 10px;padding:9px 12px;background:#2b203d;border-radius:6px}
+.turn-summary{font-size:13px;font-weight:700;color:#ded1ed}
+.turn-dock .actions{margin:0;flex-shrink:0}.turn-dock .actions button{padding:8px 14px;white-space:nowrap}
+.board-center-title{display:grid;gap:8px;margin-bottom:25px;color:#cbb5e3}
+.board-center-title strong{font-size:clamp(22px,2.4vw,38px);font-weight:800}
+.board-center-title span{font-size:14px;color:#9e8bac}
+.board .center{gap:20px;padding:30px}
+.board .center .game-dice{margin:0}
+.board .center .center-log{font-size:12px;max-height:100px}
+.board .center .center-log div:first-child{font-size:13px}
+.board .route-guide{width:320px;max-width:85%}
+.board .route-guide>button{font-size:14px;padding:9px}
+/* Upright content on all four edges, including flags and corner artwork. */
+.board .tile{border-radius:5px;padding:0;overflow:hidden;container-type:inline-size}
+.board .tile .tile-face,.board .tile.edge-right .tile-face,.board .tile.edge-left .tile-face,.board .tile.edge-bottom .tile-face,.board .tile.corner .tile-face{transform:none;inset:0;width:100%;height:100%;padding:7px 3px;display:flex;flex-direction:column;justify-content:center;gap:5px;overflow:hidden}
+.board .tile.property-tile{border-top:4px solid var(--district)}
+.board .tile .tile-face:before{display:none}
+.board .tile b,.board.large-board .tile b,.board .tile.property-tile b{display:block;font:600 clamp(10px,24cqi,15px)/1.04 Yanone,Arial,sans-serif;white-space:normal;overflow-wrap:anywhere;text-overflow:clip;max-width:100%;overflow:visible}
+.board .tile .flag,.board.large-board .tile .flag{display:block;position:static;font-size:clamp(16px,40cqi,24px);line-height:1.1;transform:none;order:-1;filter:none}
+.board .tile .price,.board.large-board .tile .price{display:block;order:3;padding:2px 3px;font:600 clamp(9px,22cqi,13px)/1 Yanone,sans-serif;background:#ffffff17}
+.board .tile .buildings{display:none;min-height:0}
+.board .tile .buildings:not(:empty){display:block;position:absolute;bottom:1px;right:2px;font-size:10px}
+.board .tile .tile-symbol,.board.large-board .tile .tile-symbol{display:block;font-size:clamp(16px,40cqi,30px);line-height:1}
+.board .tile.edge-left:not(.corner) .tile-face,.board .tile.edge-right:not(.corner) .tile-face{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:4px;padding:3px 5px;align-items:center}
+.board .tile.edge-left:not(.corner) b,.board .tile.edge-right:not(.corner) b{font-size:clamp(10px,11cqi,14px);grid-column:2;text-align:left}
+.board .tile.edge-left:not(.corner) .flag,.board .tile.edge-right:not(.corner) .flag{font-size:20px;grid-row:1;grid-column:1}
+.board .tile.edge-left:not(.corner) .price,.board .tile.edge-right:not(.corner) .price{font-size:11px;grid-row:1;grid-column:3;padding:2px}
+.board .tile.edge-left:not(.corner) .tile-symbol,.board .tile.edge-right:not(.corner) .tile-symbol{font-size:22px;grid-column:1;grid-row:1}
+.board .tile.corner b{font-size:clamp(11px,14cqi,17px)}
+.board .tile.corner .tile-symbol{font-size:clamp(25px,35cqi,40px)}
+.board .tile.tax-tile .tile-face .tile-symbol{font-size:11px}
+.board .tile .tokens{inset:auto 1px 1px auto;flex-wrap:nowrap;justify-content:flex-end;max-width:100%}
+.board .tile .token{width:16px;height:19px;margin-left:-4px}
+.board .tile.my-position{outline:2px solid #e6d4ff;outline-offset:-2px}
+.board .tile:focus-visible{outline:3px solid white;outline-offset:-3px}
+.board-viewport.overview .tile .price{display:none}
+.board-viewport.overview .tile .tile-face{gap:1px;padding:2px 0}
+.board-viewport.overview .tile .flag{font-size:12px}
+.board-viewport.overview .tile b{font-size:8px}
+.board-viewport.overview .tile.edge-left:not(.corner) .tile-face,.board-viewport.overview .tile.edge-right:not(.corner) .tile-face{grid-template-columns:14px minmax(0,1fr);padding:1px;gap:1px}
+.board-viewport.overview .board .tile:not(.corner) b{display:none}
+.board-viewport.overview .board .tile .tile-face{display:flex;align-items:center;justify-content:center;padding:1px;gap:1px}
+.board-viewport.overview .board .tile .flag{font-size:10px;line-height:1}
+.board-viewport.overview .board .tile .tile-symbol{font-size:11px}
+.board-viewport.overview .board .tile.corner .tile-symbol{font-size:18px}
+.board-viewport.overview .board .tile.corner b{font-size:7px}
+.board-viewport.overview .board .tile .token{width:8px;height:10px}
+.board-viewport.overview .board .tile .token:after{display:none}
+.board-viewport.overview .board .tile .buildings{display:none}
+.board-viewport.overview .center{padding:8px;gap:10px}
+.board-viewport.overview .board-center-title{margin:0;gap:3px}
+.board-viewport.overview .board-center-title strong{font-size:17px}
+.board-viewport.overview .board-center-title span{font-size:10px}
+.board-viewport.overview .center-log{display:none}
+.board-viewport.overview .route-guide{display:none}
+@media(min-width:1600px){.game{grid-template-columns:minmax(0,1fr) 340px}}
+@media(max-width:1050px){.game{grid-template-columns:minmax(0,1fr)}.sidebar{grid-template-columns:repeat(2,minmax(0,1fr))}.board-viewport{max-height:75dvh}body.in-room main{padding:12px}.board-wrap{max-width:none}}
+@media(max-width:600px){body.in-room main{padding:8px}.sidebar{grid-template-columns:1fr}.map-toolbar{align-items:flex-start}.map-toolbar button{padding:9px;font-size:12px;white-space:nowrap}.board-tools{gap:7px}.board-tools button{padding:8px;font-size:11px}.board-tools output{min-width:30px}.turn-dock{flex-wrap:wrap;gap:6px}.turn-dock .actions{width:100%}.board-viewport{max-height:65dvh;min-height:250px}.board-hint{font-size:11px}.board .center .die-face{width:66px;height:66px;padding:10px;gap:4px}.board .center button{font-size:14px}.board .center .game-dice{gap:20px}.board-viewport.overview .center .die-face{width:42px;height:42px;padding:7px;gap:2px}.under-board{margin:10px 0}}

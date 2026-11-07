@@ -1,0 +1,1 @@
+{"browser":{"mode":"launch","executable_path":"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"},"start_url":{"url":"https://richup.io/"},"actions":[{"step_id":"settle","action":"wait_for_timeout","duration_ms":3000}],"capture":{"artifacts":["dom","accessibility","url"],"artifact_capture":"at_end"}}

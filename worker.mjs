@@ -1,0 +1,15 @@
+import {createGame,act,boardFor,maps} from './engine.mjs';
+import {page} from './page.mjs';
+const response=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
+export default {async fetch(req,env){const url=new URL(req.url);if(!url.pathname.startsWith('/api/'))return new Response(page,{headers:{'Content-Type':'text/html; charset=utf-8'}});try{
+if(url.pathname==='/api/health')return response({ok:true});
+const db=env.DB;const body=req.method==='POST'?await req.json():{};const code=(body.code||url.searchParams.get('code')||'').toUpperCase();
+if(url.pathname==='/api/create'){const g=createGame(body.map,body.rules);const token=crypto.randomUUID();const name=String(body.name||'Host').trim().slice(0,24)||'Host';g.players.push({id:crypto.randomUUID(),token,name,pos:0,cash:g.rules.startCash,jail:0,out:false});const bytes=new Uint8Array(8);crypto.getRandomValues(bytes);const room=Array.from(bytes,x=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[x%32]).join('');await db.prepare('INSERT INTO rooms (code,state,revision,updated) VALUES (?,?,0,?)').bind(room,JSON.stringify(g),Date.now()).run();return response({code:room,token});}
+if(!/^[A-Z2-9]{8}$/.test(code))throw Error('Enter the eight-character room code');
+const row=await db.prepare('SELECT state,revision FROM rooms WHERE code=?').bind(code).first();if(!row) return response({error:'Room not found'},404);const g=JSON.parse(row.state);const token=body.token||req.headers.get('Authorization')?.replace('Bearer ','');let player=g.players.find(x=>x.token===token);
+if(url.pathname==='/api/join'){if(player)return response({code,token});if(g.status!=='lobby')throw Error('This game has already started');if(g.players.length>=8)throw Error('Room is full');const t=crypto.randomUUID();g.players.push({id:crypto.randomUUID(),token:t,name:String(body.name||'Player').trim().slice(0,24)||'Player',pos:0,cash:g.rules.startCash,jail:0,out:false});await save(t);return response({code,token:t});}
+if(!player)return response({error:'Join the room to play'},401);
+if(url.pathname==='/api/action'){act(g,player.id,body.action);await save();}else if(url.pathname!=='/api/state')return response({error:'Not found'},404);
+return response({game:{...g,players:g.players.map(({token,...p})=>p)},me:player.id,board:boardFor(g.map),maps,revision:row.revision});
+async function save(){const r=await db.prepare('UPDATE rooms SET state=?,revision=revision+1,updated=? WHERE code=? AND revision=?').bind(JSON.stringify(g),Date.now(),code,row.revision).run();if(!r.meta.changes)throw Error('Room changed — try again');}
+}catch(e){return response({error:e.message||'Request failed'},400);}}};

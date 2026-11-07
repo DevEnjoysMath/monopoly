@@ -111,7 +111,25 @@ render=function renderAtlasView() {
     el.title=el.getAttribute('aria-label');
     el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();el.click();}};
     if(tile.type==='tax'&&game.map!=='classic')el.querySelector('.tile-symbol').textContent='$100';
+    el.querySelector('.tile-face').dataset.stop=String(id);
   });
+  if(large){
+    const player=game.players[game.turn];
+    const position=player.pos;
+    const route=document.createElement('div');
+    route.className='route-guide';
+    const title=document.createElement('strong');
+    title.textContent='Ahead of '+board[position].name;
+    route.append(title);
+    for(let offset=1;offset<=3;offset++){
+      const tile=board[(position+offset)%board.length];
+      const row=document.createElement('button');
+      row.innerHTML='<small>+'+offset+'</small><span>'+esc([tile.flag,tile.name].filter(Boolean).join(' '))+'</span><b>'+(tile.price?money(tile.price):'')+'</b>';
+      row.onclick=()=>{selected=tile.id;showProperty();};
+      route.append(row);
+    }
+    $('board').querySelector('.center').append(route);
+  }
   passport.hidden=game.map!=='atlas';
   if(!passport.hidden){
     const player=game.players.find(p=>p.id===me);

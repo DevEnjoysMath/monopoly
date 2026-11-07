@@ -31,3 +31,16 @@
 .large-board .tile .price{font-size:9px}.large-board .tile .flag{font-size:12px;bottom:-6px}
 .large-board .tile.property-tile b{font-size:10px}
 @media(max-width:700px){.large-board .tile .price,.large-board .tile .flag,.large-board .buildings{display:none}.large-board .tile.property-tile b{font-size:8px;word-break:normal}.large-board .tile .tile-face{justify-content:center}.large-board .tile-symbol{font-size:14px}.large-board .tile b{line-height:1}.atlas-search{flex-direction:column}.atlas-search select{width:100%}.home-controls{padding:17px}.map-toolbar strong{font-size:14px}}
+.route-guide{width:min(84%,290px);display:grid;gap:3px;text-align:left}
+.route-guide>strong{font-size:12px;color:#c7b7db;padding-bottom:3px}
+.route-guide>button{display:grid;grid-template-columns:25px 1fr auto;gap:6px;align-items:center;text-align:left;background:#2b2339;font-size:13px;padding:6px 10px}
+.route-guide small{color:#b5a1d0}.route-guide b{color:#dccee9}
+.large-board .tile b{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:700px){
+ .large-board .tile b,.large-board .tile .tile-symbol{display:none}
+ .large-board .tile-face:before{content:attr(data-stop);font:10px Nunito,sans-serif;color:#d0c1e1}
+ .large-board .center .center-log{max-height:24px}
+ .large-board .center .game-dice{margin:0}
+ .large-board .route-guide{width:85%;max-width:230px}
+ .large-board .route-guide>button{padding:4px 8px;font-size:12px}
+}

@@ -38,6 +38,3 @@ node smoke.mjs http://localhost:4173
 
 `npm run build` generates `dist/server/index.js`, a Cloudflare Worker with an embedded UI. Internet hosting requires a compatible Worker host and a D1 `DB` binding with the schema in `drizzle/`. The former Sites URL was https://freeboard-city.blithecivet128.chatgpt.site. The local version runs independently of that account. The `.openai/hosting.json` preserves the original project identity for later reconnection.
 
-## REA investigation
-
-The official `morluto/rea` repository is cloned beside this checkout at `../rea-tools`. REA CLI 6.8.0 is installed locally and has been used to inspect Richup's public pages and JavaScript, including its room module and pardon-card controls. REA is a research tool; it is not required to run this game. `PARITY.md` records the findings and remaining gaps. This is an independent implementation; complete one-to-one Richup parity has not been established.

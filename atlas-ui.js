@@ -140,6 +140,12 @@ render=function renderAtlasView() {
     passport.innerHTML='<h2>Three-country passport</h2><p>'+ (player.passport?'$200 bonus collected.':'Own a city in each country at the same time to earn $200 once.')+'</p><div>'+stamps.join('')+'</div>';
   }
   if(atlasDialog.open)displayDirectory();
+  const player=game.players.find(p=>p.id===me);
+  for (const deck of player.pardons||[]) {
+    const card=btn(deck+' prison pardon','usePardon',!(game.status==='playing' && game.players[game.turn].id===me && game.phase==='roll' && player.jail>0),{deck});
+    card.title='Use before rolling in prison to leave without paying bail.';
+    portfolio.querySelector('.portfolio-list').append(card);
+  }
 };
 if(data)render();
 

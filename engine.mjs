@@ -8,6 +8,40 @@ const rents={1:[2,10,30,90,160,250],3:[4,20,60,180,320,450],6:[6,30,90,270,400,5
 export function boardFor(key){if(key==='atlas')return atlasBoard();if(key==='classic')return classicNames.map((name,i)=>({id:i,name,type:i===0?'go':i===10?'jail':i===20?'park':i===30?'gojail':i===4||i===38?'tax':[5,15,25,35].includes(i)?'station':[12,27].includes(i)?'utility':[2,8,17,22,33,36].includes(i)?'event':'property',group:groups[i]??-1,price:prices[i],rent:rents[i]?.[0]||25,rents:rents[i],buildCost:50*(1+Math.floor((groups[i]||0)/2)),flag:groups[i]===undefined?'':['🇧🇷','🇮🇱','🇮🇹','🇩🇪','🇨🇳','🇫🇷','🇬🇧','🇺🇸'][groups[i]]}));const m=maps[key];let city=0;return Array.from({length:m.size},(_,i)=>{const q=m.size/4;let type=i===0?'go':i===q?'jail':i===q*2?'park':i===q*3?'gojail':i%q===Math.floor(q/2)?'station':i%9===3?'event':i%13===4?'tax':'property';return {id:i,type,name:type==='property'?m.cities[city++%m.cities.length]:({go:'START',jail:'In Prison',park:'Vacation',gojail:'Go to prison',station:'Airport',event:i%2?'Treasure':'Surprise',tax:'City tax'})[type],group:Math.floor(i/4),price:100+Math.floor(i/4)*35,rent:12+Math.floor(i/4)*5};});}
 export function createGame(map='world',rules={}){if(!maps[map])throw Error('Unknown map');return {map,rules:{salary:200,startCash:1500,events:true,freeParking:false,roundLimit:0,maxPlayers:4,doubleRent:false,noPrisonRent:false,mortgage:false,evenBuild:true,auction:false,randomOrder:true,...rules},players:[],status:'lobby',turn:0,phase:'roll',round:1,dice:[1,1],doubles:0,properties:{},log:['Room created. Invite your friends.'],chat:[],pot:0,pending:null,trade:null};}
 function log(g,s){g.log.unshift(s);g.log=g.log.slice(0,40);}
+const cityDecks = {
+  Treasure: [
+    ['Festival dividend',100], ['Station repairs',-50], ['Travel grant',75],
+    ['Neighborhood improvements',-40], ['Market day',50], ['Prison pardon',0]
+  ],
+  Surprise: [
+    ['Delayed train',-75], ['Tourism bonus',90], ['Permit refund',50],
+    ['Bridge toll',-35], ['Street fair',65], ['Prison pardon',0]
+  ]
+};
+
+function drawCityCard(game, player, tileName, random) {
+  const deck = tileName === 'Surprise' ? 'Surprise' : 'Treasure';
+  game.drawPiles ??= {};
+  let pile = game.drawPiles[deck] ??= [];
+  if (!pile.length) {
+    const held = game.players.some(p => !p.out && p.pardons?.includes(deck));
+    pile = cityDecks[deck].map((_,index)=>index).filter(index=>!held || index!==5);
+    for (let end=pile.length-1; end>0; end--) {
+      const index=Math.floor(random()*(end+1));
+      [pile[end],pile[index]]=[pile[index],pile[end]];
+    }
+    game.drawPiles[deck]=pile;
+  }
+  const [name,amount]=cityDecks[deck][pile.pop()];
+  if (name==='Prison pardon') {
+    (player.pardons ??= []).push(deck);
+    log(game,player.name+' drew a '+deck+' prison pardon.');
+  } else {
+    player.cash+=amount;
+    if (amount<0) game.pot-=amount;
+    log(game,deck+' · '+name+' · '+player.name+(amount>0?' received $':' paid $')+Math.abs(amount));
+  }
+}
 function requireThat(c,s){if(!c)throw Error(s);}
 function pay(g,p,amount,to){p.cash-=amount;if(to)to.cash+=amount;else g.pot+=amount;}
 function finish(g){const alive=g.players.filter(x=>!x.out);if(alive.length===1){g.status='finished';g.winner=alive[0].id;log(g,alive[0].name+' wins!');}}
@@ -28,6 +62,14 @@ if(a.type==='trade'){requireThat(!g.trade,'Resolve the existing offer');const ta
 if(a.type==='rejectTrade'){requireThat(g.trade&&(g.trade.to===id||g.trade.from===id),'No offer');g.trade=null;return;}
 if(a.type==='acceptTrade'){const t=g.trade;requireThat(t?.to===id,'No trade for you');const from=g.players.find(x=>x.id===t.from);requireThat(from.cash>=t.give&&p.cash>=t.take&&(t.gp===-1||own(t.gp)?.owner===from.id)&&(t.tp===-1||own(t.tp)?.owner===id),'Offer no longer valid');from.cash+=t.take-t.give;p.cash+=t.give-t.take;if(t.gp!==-1)own(t.gp).owner=id;if(t.tp!==-1)own(t.tp).owner=from.id;g.trade=null;add('Trade completed.');return;}
 requireThat(current.id===id,'Wait for your turn');
+if(a.type==='usePardon'){
+  requireThat(g.phase==='roll' && p.jail>0,'Use a pardon before rolling in prison');
+  requireThat(p.pardons?.includes(a.deck),'You do not hold that pardon');
+  p.pardons.splice(p.pardons.indexOf(a.deck),1);
+  p.jail=0;
+  log(g,p.name+' used a '+a.deck+' pardon to leave prison.');
+  return;
+}
 if(a.type==='build'){const t=board[Number(a.tile)],o=own(t?.id);requireThat(t?.type==='property'&&o?.owner===id&&full(t.group)&&!board.some(x=>x.group===t.group&&own(x.id)?.mortgaged),'Own an unmortgaged city set first');const level=o.level||0,cost=t.buildCost||Math.ceil(t.price/2);requireThat(level<5&&p.cash>=cost,'Cannot afford more buildings');requireThat(!g.rules.evenBuild||board.filter(x=>x.type==='property'&&x.group===t.group).every(x=>(own(x.id).level||0)>=level),'Build evenly across the set');p.cash-=cost;o.level=level+1;add(p.name+' developed '+t.name);return;}
 if(a.type==='mortgage'){requireThat(g.rules.mortgage,'Mortgage is disabled in this room');const t=board[Number(a.tile)],o=own(t?.id);requireThat(o?.owner===id&&!board.some(x=>x.group===t.group&&(own(x.id)?.level||0)>0),'Sell buildings in this set first');const cost=Math.floor(t.price/2);if(o.mortgaged){requireThat(p.cash>=Math.ceil(cost*1.1),'Not enough cash');p.cash-=Math.ceil(cost*1.1);o.mortgaged=false;}else{p.cash+=cost;o.mortgaged=true;}return;}
 if(a.type==='sellBuilding'){const t=board[Number(a.tile)],o=own(t?.id);requireThat(o?.owner===id&&o.level>0,'No building to sell');requireThat(!g.rules.evenBuild||board.filter(x=>x.type==='property'&&x.group===t.group).every(x=>(own(x.id)?.level||0)<=o.level),'Sell evenly across the set');o.level--;p.cash+=Math.floor((t.buildCost||Math.ceil(t.price/2))/2);return;}
@@ -39,7 +81,7 @@ if(a.type==='end'){requireThat(g.phase==='end'&&p.cash>=0,'Resolve your turn and
 requireThat(a.type==='roll'&&g.phase==='roll','Roll is unavailable');requireThat(p.cash>=0,'Resolve debts first');g.dice=[1+Math.floor(random()*6),1+Math.floor(random()*6)];const doubles=g.dice[0]===g.dice[1];g.doubles=doubles?g.doubles+1:0;g.phase='end';if(g.doubles===3){jail();return;}
 if(p.jail){p.jail--;if(doubles){p.jail=0;g.doubles=0;add(p.name+' rolled out of jail.');}else if(p.jail>0){add(p.name+' stays in jail.');return;}else{pay(g,p,50);add(p.name+' paid $50 to leave jail.');}}
 const old=p.pos;p.pos=(old+g.dice[0]+g.dice[1])%board.length;if(p.pos<old){p.cash+=g.rules.salary;add(p.name+' collected $'+g.rules.salary);}
-const t=board[p.pos];add(p.name+' landed on '+t.name);if(t.type==='gojail'){jail();return;}if(t.type==='tax'){const tax=g.map==='classic'?(t.id===4?Math.floor(Math.max(p.cash,0)*.1):75):100;pay(g,p,tax);add('Tax: $'+tax);}if(t.type==='park'&&g.rules.freeParking){p.cash+=g.pot;add('Vacation cash: $'+g.pot);g.pot=0;}if(t.type==='event'&&g.rules.events){const amount=random()<.5?100:-75;p.cash+=amount;add(amount>0?'City festival bonus: $100':'Street repairs: pay $75');}
+const t=board[p.pos];add(p.name+' landed on '+t.name);if(t.type==='gojail'){jail();return;}if(t.type==='tax'){const tax=g.map==='classic'?(t.id===4?Math.floor(Math.max(p.cash,0)*.1):75):100;pay(g,p,tax);add('Tax: $'+tax);}if(t.type==='park'&&g.rules.freeParking){p.cash+=g.pot;add('Vacation cash: $'+g.pot);g.pot=0;}if(t.type==='event'&&g.rules.events) drawCityCard(g,p,t.name,random);
 if(['property','station','utility'].includes(t.type)){const o=own(t.id);if(!o){g.phase='buy';}else if(o.owner!==id&&!o.mortgaged){const owner=g.players.find(x=>x.id===o.owner);if(owner.jail&&g.rules.noPrisonRent)return;const level=o.level||0;const stations=board.filter(x=>x.type==='station'&&own(x.id)?.owner===owner.id).length;const utilities=board.filter(x=>x.type==='utility'&&own(x.id)?.owner===owner.id).length;const rent=t.type==='utility'?(utilities===2?10:4)*(g.dice[0]+g.dice[1]):t.type==='station'?25*Math.pow(2,stations-1):(t.rents?t.rents[level]:t.rent*[1,3,8,15,25,40][level])*(g.rules.doubleRent&&level===0&&board.filter(x=>x.type==='property'&&x.group===t.group).every(x=>own(x.id)?.owner===owner.id)?2:1);pay(g,p,rent,owner);add(p.name+' paid $'+rent+' rent to '+owner.name);}}
 function jail(){p.pos=board.length/4;p.jail=3;g.doubles=0;g.phase='end';add(p.name+' went to jail.');}
 function next(){g.doubles=0;g.trade=null;let next=g.turn;do{next=(next+1)%g.players.length;if(next===0)g.round++;}while(g.players[next].out);g.turn=next;g.phase='roll';if(g.rules.roundLimit&&g.round>g.rules.roundLimit){g.status='finished';g.winner=g.players.filter(x=>!x.out).sort((a,b)=>worth(b)-worth(a))[0].id;add('Round limit reached. Highest net worth wins.');}}

@@ -28,3 +28,13 @@ test('Express passport is awarded once on acquisition and survives resale',()=>{
   delete g.properties[albania.id];g.phase='buy';act(g,'a',{type:'buy'});
   assert.equal(g.players[0].cash,2200-albania.price*2);
 });
+test('a drawn prison pardon belongs to its player and can be used once',()=>{
+  const g=game();g.map='classic';g.players[0].pos=0;g.drawPiles={Treasure:[5]};
+  act(g,'a',{type:'roll'},()=>0);
+  assert.deepEqual(g.players[0].pardons,['Treasure']);
+  assert.throws(()=>act(g,'a',{type:'usePardon',deck:'Treasure'}),/before rolling/);
+  g.phase='roll';g.players[0].jail=2;
+  const cash=g.players[0].cash;
+  act(g,'a',{type:'usePardon',deck:'Treasure'});
+  assert.equal(g.players[0].cash,cash);assert.equal(g.players[0].jail,0);assert.deepEqual(g.players[0].pardons,[]);
+});

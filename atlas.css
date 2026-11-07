@@ -1,0 +1,33 @@
+#home{max-width:740px;margin:auto}
+#home .intro{padding:18px 0 8px}
+.home-die{font-size:64px}
+#home h1{font-size:54px}
+.home-controls{width:min(100%,380px);margin:24px auto 0;padding:22px;background:#221c33;border:1px solid #40364f;border-radius:10px}
+.home-controls label{text-align:left;margin-top:0;color:#d5c8e9}
+.home-controls .map-description{color:#c3b6d4;font-size:13px;line-height:1.5;min-height:36px;text-align:left}
+.home-controls>input,.home-controls .play{width:100%}
+.home-controls .play{font-size:19px;padding:14px;margin-bottom:12px}
+.home-controls .links button{flex:1}
+.home-help{margin:35px auto}
+.map-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.map-toolbar strong,.map-toolbar small{display:block}
+.map-toolbar strong{font-size:16px;color:#efe7fa}
+.map-toolbar small{color:#b5a5c9;font-size:12px}
+.map-toolbar button,.atlas-dialog header button{background:#463459;color:white}
+.atlas-dialog{width:min(540px,95vw);border:1px solid #59506e;border-radius:10px;background:#241d33;color:#eee6f8;padding:18px}
+.atlas-dialog::backdrop{background:#0a0714bb}
+.atlas-dialog header,.in-room .atlas-dialog header{display:flex;height:auto;padding:0;justify-content:space-between;align-items:center}
+.atlas-dialog h2{font-size:20px;margin:0}
+.atlas-search{display:flex;gap:8px;margin:15px 0}
+.atlas-search select{width:38%}
+.atlas-results{overflow:auto;max-height:55vh;scrollbar-gutter:stable}
+.atlas-results h3{font-size:13px;color:#c9b6e3;margin:20px 0 6px}
+.atlas-result{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;width:100%;text-align:left;background:#302840;border:1px solid transparent;margin-bottom:3px;font-size:14px}
+.atlas-result small{color:#c6b6d7;align-self:center;overflow-wrap:anywhere}
+.atlas-result:hover,.atlas-result:focus-visible,.tile:focus-visible{outline:2px solid #b596f0}
+.passport-panel p{color:#c7b8d8;font-size:13px}.passport-panel>div{display:flex;gap:8px;flex-wrap:wrap}
+.passport-panel span{padding:6px 10px;background:#383044;border-radius:4px;font-size:12px;color:#c7bbd3}
+.passport-panel span.held{background:#264f42;color:#a5f1cc}
+.large-board .tile .price{font-size:9px}.large-board .tile .flag{font-size:12px;bottom:-6px}
+.large-board .tile.property-tile b{font-size:10px}
+@media(max-width:700px){.large-board .tile .price,.large-board .tile .flag,.large-board .buildings{display:none}.large-board .tile.property-tile b{font-size:8px;word-break:normal}.large-board .tile .tile-face{justify-content:center}.large-board .tile-symbol{font-size:14px}.large-board .tile b{line-height:1}.atlas-search{flex-direction:column}.atlas-search select{width:100%}.home-controls{padding:17px}.map-toolbar strong{font-size:14px}}
